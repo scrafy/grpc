@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package grpc_test.presentation.proto.users;
+
+
+service Users {  
+  rpc LoadUsers(LoadUsersRequest) returns (LoadUsersResponse) {}
+}
+
+
+message Users{
+
+    int32 id=1;
+    string first_name = 2;
+    string last_name = 3;
+    string telephon_numer = 4;
+    string address = 5;
+    string country = 6;
+    string zip_code = 7;
+    int32 age = 8;
+}
+
+message LoadUsersRequest {
+  repeated users = 1;
+}
+
+
+message LoadUsersResponse {
+  string message = 1;  
+}
