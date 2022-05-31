@@ -1,9 +1,9 @@
 syntax = "proto3";
 
-package grpc_test.presentation.proto.users;
+package userstore;
 
 
-service Users {  
+service UserService {  
   rpc LoadUsers(LoadUsersRequest) returns (LoadUsersResponse) {}
 }
 
@@ -21,7 +21,7 @@ message Users{
 }
 
 message LoadUsersRequest {
-  repeated users = 1;
+  repeated Users users = 1;
 }
 
 
