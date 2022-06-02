@@ -20,3 +20,4 @@ artifacts:
 cache:
   paths:
     - $HOME/.cargo/registry/**/*
+    
