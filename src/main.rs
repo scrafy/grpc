@@ -41,7 +41,8 @@ impl UserService for UserServiceImpl {
     ) -> std::result::Result<Response<LoadUsersResponse>, Status> {
 
         let body: Vec<Users> = request.into_inner().users;
-        println!("Reciving message {:?}", body);      
+        println!("Reciving message {:?}", body);       
+        let response = LoadUsersResponse {
             message: "Users received".to_string()
         };
         Ok(Response::new(response))
