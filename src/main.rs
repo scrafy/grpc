@@ -41,11 +41,7 @@ impl UserService for UserServiceImpl {
     ) -> std::result::Result<Response<LoadUsersResponse>, Status> {
 
         let body: Vec<Users> = request.into_inner().users;
-        println!("Reciving message {:?}", body);
-        let output = File::create("datos.json").unwrap();
-        let writer = BufWriter::new(output);
-        serde_json::to_writer(writer, &body).unwrap();
-        let response = LoadUsersResponse {
+        println!("Reciving message {:?}", body);      
             message: "Users received".to_string()
         };
         Ok(Response::new(response))
