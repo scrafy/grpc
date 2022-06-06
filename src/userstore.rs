@@ -17,6 +17,7 @@ pub struct Users {
     #[prost(int32, tag="8")]
     pub age: i32,
 }
+
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct LoadUsersRequest {
     #[prost(message, repeated, tag="1")]
