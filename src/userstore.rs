@@ -1,31 +1,31 @@
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct Users {
-    #[prost(int32, tag="1")]
+    #[prost(int32, tag = "1")]
     pub id: i32,
-    #[prost(string, tag="2")]
+    #[prost(string, tag = "2")]
     pub first_name: ::prost::alloc::string::String,
-    #[prost(string, tag="3")]
+    #[prost(string, tag = "3")]
     pub last_name: ::prost::alloc::string::String,
-    #[prost(string, tag="4")]
+    #[prost(string, tag = "4")]
     pub telephon_numer: ::prost::alloc::string::String,
-    #[prost(string, tag="5")]
+    #[prost(string, tag = "5")]
     pub address: ::prost::alloc::string::String,
-    #[prost(string, tag="6")]
+    #[prost(string, tag = "6")]
     pub country: ::prost::alloc::string::String,
-    #[prost(string, tag="7")]
+    #[prost(string, tag = "7")]
     pub zip_code: ::prost::alloc::string::String,
-    #[prost(int32, tag="8")]
+    #[prost(int32, tag = "8")]
     pub age: i32,
 }
 
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct LoadUsersRequest {
-    #[prost(message, repeated, tag="1")]
+    #[prost(message, repeated, tag = "1")]
     pub users: ::prost::alloc::vec::Vec<Users>,
 }
 #[derive(Clone, PartialEq, ::prost::Message)]
 pub struct LoadUsersResponse {
-    #[prost(string, tag="1")]
+    #[prost(string, tag = "1")]
     pub message: ::prost::alloc::string::String,
 }
 /// Generated client implementations.
@@ -71,9 +71,8 @@ pub mod user_service_client {
                     <T as tonic::client::GrpcService<tonic::body::BoxBody>>::ResponseBody,
                 >,
             >,
-            <T as tonic::codegen::Service<
-                http::Request<tonic::body::BoxBody>,
-            >>::Error: Into<StdError> + Send + Sync,
+            <T as tonic::codegen::Service<http::Request<tonic::body::BoxBody>>>::Error:
+                Into<StdError> + Send + Sync,
         {
             UserServiceClient::new(InterceptedService::new(inner, interceptor))
         }
@@ -96,19 +95,14 @@ pub mod user_service_client {
             &mut self,
             request: impl tonic::IntoRequest<super::LoadUsersRequest>,
         ) -> Result<tonic::Response<super::LoadUsersResponse>, tonic::Status> {
-            self.inner
-                .ready()
-                .await
-                .map_err(|e| {
-                    tonic::Status::new(
-                        tonic::Code::Unknown,
-                        format!("Service was not ready: {}", e.into()),
-                    )
-                })?;
+            self.inner.ready().await.map_err(|e| {
+                tonic::Status::new(
+                    tonic::Code::Unknown,
+                    format!("Service was not ready: {}", e.into()),
+                )
+            })?;
             let codec = tonic::codec::ProstCodec::default();
-            let path = http::uri::PathAndQuery::from_static(
-                "/userstore.UserService/LoadUsers",
-            );
+            let path = http::uri::PathAndQuery::from_static("/userstore.UserService/LoadUsers");
             self.inner.unary(request.into_request(), path, codec).await
         }
     }
@@ -144,10 +138,7 @@ pub mod user_service_server {
                 send_compression_encodings: Default::default(),
             }
         }
-        pub fn with_interceptor<F>(
-            inner: T,
-            interceptor: F,
-        ) -> InterceptedService<Self, F>
+        pub fn with_interceptor<F>(inner: T, interceptor: F) -> InterceptedService<Self, F>
         where
             F: tonic::service::Interceptor,
         {
@@ -163,10 +154,7 @@ pub mod user_service_server {
         type Response = http::Response<tonic::body::BoxBody>;
         type Error = std::convert::Infallible;
         type Future = BoxFuture<Self::Response, Self::Error>;
-        fn poll_ready(
-            &mut self,
-            _cx: &mut Context<'_>,
-        ) -> Poll<Result<(), Self::Error>> {
+        fn poll_ready(&mut self, _cx: &mut Context<'_>) -> Poll<Result<(), Self::Error>> {
             Poll::Ready(Ok(()))
         }
         fn call(&mut self, req: http::Request<B>) -> Self::Future {
@@ -175,15 +163,9 @@ pub mod user_service_server {
                 "/userstore.UserService/LoadUsers" => {
                     #[allow(non_camel_case_types)]
                     struct LoadUsersSvc<T: UserService>(pub Arc<T>);
-                    impl<
-                        T: UserService,
-                    > tonic::server::UnaryService<super::LoadUsersRequest>
-                    for LoadUsersSvc<T> {
+                    impl<T: UserService> tonic::server::UnaryService<super::LoadUsersRequest> for LoadUsersSvc<T> {
                         type Response = super::LoadUsersResponse;
-                        type Future = BoxFuture<
-                            tonic::Response<Self::Response>,
-                            tonic::Status,
-                        >;
+                        type Future = BoxFuture<tonic::Response<Self::Response>, tonic::Status>;
                         fn call(
                             &mut self,
                             request: tonic::Request<super::LoadUsersRequest>,
@@ -200,28 +182,23 @@ pub mod user_service_server {
                         let inner = inner.0;
                         let method = LoadUsersSvc(inner);
                         let codec = tonic::codec::ProstCodec::default();
-                        let mut grpc = tonic::server::Grpc::new(codec)
-                            .apply_compression_config(
-                                accept_compression_encodings,
-                                send_compression_encodings,
-                            );
+                        let mut grpc = tonic::server::Grpc::new(codec).apply_compression_config(
+                            accept_compression_encodings,
+                            send_compression_encodings,
+                        );
                         let res = grpc.unary(method, req).await;
                         Ok(res)
                     };
                     Box::pin(fut)
                 }
-                _ => {
-                    Box::pin(async move {
-                        Ok(
-                            http::Response::builder()
-                                .status(200)
-                                .header("grpc-status", "12")
-                                .header("content-type", "application/grpc")
-                                .body(empty_body())
-                                .unwrap(),
-                        )
-                    })
-                }
+                _ => Box::pin(async move {
+                    Ok(http::Response::builder()
+                        .status(200)
+                        .header("grpc-status", "12")
+                        .header("content-type", "application/grpc")
+                        .body(empty_body())
+                        .unwrap())
+                }),
             }
         }
     }

@@ -15,7 +15,7 @@ fs = "0.0.5"
 mongodb = "2.1"
 bson = { version = "2", features = ["chrono-0_4"] } # Needed for using chrono datetime in doc
 chrono = "0.4" # Used for setting DateTimes
-
+async-trait = "0.1.56"
 
 [build-dependencies]
 tonic-build = "0.7.2"

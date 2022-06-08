@@ -1,22 +1,21 @@
-use serde_json::Result;
-use std::io::{BufReader,BufWriter};
-use std::fs::File;
+mod infraestructure;
+
+use crate::infraestructure::implementations::DBContext;
+use crate::infraestructure::traits::IDBContext;
+use serde::ser::{SerializeStruct, Serializer};
 use tonic::{transport::Server, Request, Response, Status};
 use userstore::user_service_server::{UserService, UserServiceServer};
 use userstore::{LoadUsersRequest, LoadUsersResponse, Users};
-use serde::ser::{Serialize, Serializer, SerializeStruct};
 
 mod userstore {
-    include!("userstore.rs");   
+    include!("userstore.rs");
 }
 
-impl serde::Serialize for Users{
-
+impl serde::Serialize for Users {
     fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
-        
         let mut state = serializer.serialize_struct("Users", 8)?;
         state.serialize_field("id", &self.id)?;
         state.serialize_field("first_name", &self.first_name)?;
@@ -39,11 +38,12 @@ impl UserService for UserServiceImpl {
         &self,
         request: Request<LoadUsersRequest>,
     ) -> std::result::Result<Response<LoadUsersResponse>, Status> {
-
         let body: Vec<Users> = request.into_inner().users;
-        println!("Reciving message {:?}", body);       
+        println!("Reciving message {:?}", body);
+        let db = DBContext::new();
+        //store(&db, &body);
         let response = LoadUsersResponse {
-            message: "Users received".to_string()
+            message: "Users received".to_string(),
         };
         Ok(Response::new(response))
     }
@@ -54,7 +54,6 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     let addr = "0.0.0.0:50051".parse().unwrap();
     let userstore = UserServiceImpl::default();
 
-
     println!("Server listening on {}", addr);
 
     Server::builder()
@@ -64,3 +63,11 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
+/*
+fn store(service: Box<dyn IDBContext>, data: &[Users]) -> () {
+    service
+        .set_database("Users")
+        .set_collection("users")
+        .insert(data);
+}
+*/
