@@ -8,12 +8,12 @@ service UserService {
 }
 
 
-message Users{
+message User{
 
     int32 id=1;
     string first_name = 2;
     string last_name = 3;
-    string telephon_numer = 4;
+    string telephon_number = 4;
     string address = 5;
     string country = 6;
     string zip_code = 7;
@@ -21,7 +21,7 @@ message Users{
 }
 
 message LoadUsersRequest {
-  repeated Users users = 1;
+  repeated User users = 1;
 }
 
 

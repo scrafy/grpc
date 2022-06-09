@@ -5,13 +5,13 @@ use crate::infraestructure::traits::IDBContext;
 use serde::ser::{SerializeStruct, Serializer};
 use tonic::{transport::Server, Request, Response, Status};
 use userstore::user_service_server::{UserService, UserServiceServer};
-use userstore::{LoadUsersRequest, LoadUsersResponse, Users};
+use userstore::{LoadUsersRequest, LoadUsersResponse, User};
 
 mod userstore {
     include!("userstore.rs");
 }
 
-impl serde::Serialize for Users {
+impl serde::Serialize for User {
     fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -20,7 +20,7 @@ impl serde::Serialize for Users {
         state.serialize_field("id", &self.id)?;
         state.serialize_field("first_name", &self.first_name)?;
         state.serialize_field("last_name", &self.last_name)?;
-        state.serialize_field("telephon_numer", &self.telephon_numer)?;
+        state.serialize_field("telephon_number", &self.telephon_number)?;
         state.serialize_field("address", &self.address)?;
         state.serialize_field("country", &self.country)?;
         state.serialize_field("zip_code", &self.zip_code)?;
@@ -38,7 +38,7 @@ impl UserService for UserServiceImpl {
         &self,
         request: Request<LoadUsersRequest>,
     ) -> std::result::Result<Response<LoadUsersResponse>, Status> {
-        let body: Vec<Users> = request.into_inner().users;
+        let body: Vec<User> = request.into_inner().users;
         println!("Reciving message {:?}", body);
         let db = DBContext::new();
         //store(&db, &body);
