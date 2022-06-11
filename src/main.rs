@@ -1,7 +1,18 @@
 mod infraestructure;
 
-use crate::infraestructure::implementations::DBContext;
+use crate::infraestructure::schemas::SchemaUser;
 use crate::infraestructure::traits::IDBContext;
+
+use async_trait::async_trait;
+use bson::Document;
+use mongodb::{
+    options::{ClientOptions, ResolverConfig},
+    Client,
+};
+
+
+use crate::infraestructure::implementations::DBContext;
+//use crate::infraestructure::traits::IDBContext;
 use serde::ser::{SerializeStruct, Serializer};
 use tonic::{transport::Server, Request, Response, Status};
 use userstore::user_service_server::{UserService, UserServiceServer};
@@ -39,9 +50,13 @@ impl UserService for UserServiceImpl {
         request: Request<LoadUsersRequest>,
     ) -> std::result::Result<Response<LoadUsersResponse>, Status> {
         let body: Vec<User> = request.into_inner().users;
-        println!("Reciving message {:?}", body);
-        let db = DBContext::new();
-        //store(&db, &body);
+        
+
+
+        let db = Box::new(DBContext::new());
+
+
+        store(db, body);
         let response = LoadUsersResponse {
             message: "Users received".to_string(),
         };
@@ -63,11 +78,54 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
 
     Ok(())
 }
-/*
-fn store(service: Box<dyn IDBContext>, data: &[Users]) -> () {
-    service
-        .set_database("Users")
-        .set_collection("users")
-        .insert(data);
+
+
+fn store(mut service: Box<dyn IDBContext>, data: Vec<User>) -> () {
+    
+    service.as_mut().set_database("Users".to_string()).set_collection("users".to_string());
+    insert(data);
+   // service.as_mut().set_collection("users".to_string());
+    //service.insert(data);
 }
-*/
+
+
+ fn insert(data: Vec<User>) -> () {
+    
+    let mut user_documents: Vec<Document> = Vec::new();
+    for user in data.into_iter() {
+        let schema_user: SchemaUser = SchemaUser {
+            first_name: user.first_name,
+            last_name: user.last_name,
+            telephon_number: user.telephon_number,
+            address: user.address,
+            country: user.country,
+            zip_code: user.zip_code,
+            age: user.age,
+        };
+
+        user_documents.push(
+            bson::to_bson(&schema_user)
+                .unwrap()
+                .as_document()
+                .unwrap()
+                .clone(),
+        );
+    }
+   
+   /* self.get_client()
+        .database("Users")
+        .collection::<Document>("users")
+        .insert_many(user_documents, None);
+
+        println!("{:?}", user_documents);
+
+    let options =
+        ClientOptions::parse_with_resolver_config("mongodb+srv://velocitech:compaq7500@velocitech.5peyq.mongodb.net/?retryWrites=true&w=majority".to_string(), ResolverConfig::cloudflare())
+            .await
+            .unwrap();
+    Client::with_options(options)
+        .unwrap()
+        .database("Users")
+        .collection::<Document>("users")
+        .insert_many(user_documents, None);*/
+}
