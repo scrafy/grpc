@@ -1,18 +1,9 @@
-mod infraestructure;
-
-use crate::infraestructure::schemas::SchemaUser;
-use crate::infraestructure::traits::IDBContext;
-
-use async_trait::async_trait;
 use bson::Document;
 use mongodb::{
     options::{ClientOptions, ResolverConfig},
     Client,
 };
-
-
-use crate::infraestructure::implementations::DBContext;
-//use crate::infraestructure::traits::IDBContext;
+use serde::{Serialize, Deserialize};
 use serde::ser::{SerializeStruct, Serializer};
 use tonic::{transport::Server, Request, Response, Status};
 use userstore::user_service_server::{UserService, UserServiceServer};
@@ -21,6 +12,19 @@ use userstore::{LoadUsersRequest, LoadUsersResponse, User};
 mod userstore {
     include!("userstore.rs");
 }
+
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct SchemaUser {
+    pub first_name: String,
+    pub last_name: String,
+    pub telephon_number: String,
+    pub address: String,
+    pub country: String,
+    pub zip_code: String,
+    pub age: i32,
+}
+
 
 impl serde::Serialize for User {
     fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
@@ -50,13 +54,20 @@ impl UserService for UserServiceImpl {
         request: Request<LoadUsersRequest>,
     ) -> std::result::Result<Response<LoadUsersResponse>, Status> {
         let body: Vec<User> = request.into_inner().users;
-        
-
-
-        let db = Box::new(DBContext::new());
-
-
-        store(db, body);
+        println!("processing {} users", body.len());
+        let handle = tokio::spawn(async move {
+            let options =
+                ClientOptions::parse_with_resolver_config("mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&ssl=false".to_string(), ResolverConfig::cloudflare())
+                    .await
+                    .unwrap();
+            let client = Client::with_options(options).unwrap();
+            client
+                .database("Users")
+                .collection::<Document>("users")
+                .insert_many(documents(body), None)
+                .await;
+        });
+       // handle.await;
         let response = LoadUsersResponse {
             message: "Users received".to_string(),
         };
@@ -79,18 +90,7 @@ async fn main() -> std::result::Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-
-fn store(mut service: Box<dyn IDBContext>, data: Vec<User>) -> () {
-    
-    service.as_mut().set_database("Users".to_string()).set_collection("users".to_string());
-    insert(data);
-   // service.as_mut().set_collection("users".to_string());
-    //service.insert(data);
-}
-
-
- fn insert(data: Vec<User>) -> () {
-    
+fn documents(data: Vec<User>) -> Vec<Document> {
     let mut user_documents: Vec<Document> = Vec::new();
     for user in data.into_iter() {
         let schema_user: SchemaUser = SchemaUser {
@@ -111,21 +111,5 @@ fn store(mut service: Box<dyn IDBContext>, data: Vec<User>) -> () {
                 .clone(),
         );
     }
-   
-   /* self.get_client()
-        .database("Users")
-        .collection::<Document>("users")
-        .insert_many(user_documents, None);
-
-        println!("{:?}", user_documents);
-
-    let options =
-        ClientOptions::parse_with_resolver_config("mongodb+srv://velocitech:compaq7500@velocitech.5peyq.mongodb.net/?retryWrites=true&w=majority".to_string(), ResolverConfig::cloudflare())
-            .await
-            .unwrap();
-    Client::with_options(options)
-        .unwrap()
-        .database("Users")
-        .collection::<Document>("users")
-        .insert_many(user_documents, None);*/
+    return user_documents;
 }
